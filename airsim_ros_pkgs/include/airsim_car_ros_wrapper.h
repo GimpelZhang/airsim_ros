@@ -224,6 +224,7 @@ private:
 
         /// State
         msr::airlib::CarApiBase::CarState curr_car_state;
+        msr::airlib::CarApiBase::CarControls controls;
         // bool in_air_; // todo change to "status" and keep track of this
         nav_msgs::Odometry curr_odom_ned;
         sensor_msgs::NavSatFix gps_sensor_msg;

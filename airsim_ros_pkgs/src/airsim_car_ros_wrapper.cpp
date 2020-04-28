@@ -54,8 +54,9 @@ void AirsimCarROSWrapper::initialize_airsim()
 
         for (const auto& vehicle_name : vehicle_names_)
         {
-            //airsim_client_.enableApiControl(true, vehicle_name); // todo expose as rosservice?
+            airsim_client_.enableApiControl(true, vehicle_name); // todo expose as rosservice?
             //airsim_client_.armDisarm(true, vehicle_name); // todo exposes as rosservice?
+            
         }
 
         origin_geo_point_ = airsim_client_.getHomeGeoPoint("");
