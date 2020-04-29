@@ -756,16 +756,20 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
             car_ros.global_gps_pub.publish(car_ros.gps_sensor_msg);
 
             // send control commands from the last callback to airsim
-            /*
+            
             if (car_ros.has_vel_cmd)
             {
+                /*
                 std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
                 airsim_client_.moveByVelocityAsync(car_ros.vel_cmd.x, car_ros.vel_cmd.y, car_ros.vel_cmd.z, vel_cmd_duration_, 
                     msr::airlib::DrivetrainType::MaxDegreeOfFreedom, car_ros.vel_cmd.yaw_mode, car_ros.vehicle_name);
                 lck.unlock();
+                */
+                car_ros.controls.throttle = 0.5f;
+                car_ros.controls.steering = 0.0f;
+                airsim_client_.setCarControls(car_ros.controls);
+                printf("############### CHECK POINT: car_ros.has_vel_cmd ###################");
             }
-            */
-
             // "clear" control cmds
             car_ros.has_vel_cmd = false;
         }
