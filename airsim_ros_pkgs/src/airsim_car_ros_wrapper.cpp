@@ -430,6 +430,8 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
     // airsim uses degrees
     car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.yaw_or_rate = math_common::rad2deg(msg->twist.angular.z);
     car_ros_vec_[vehicle_idx].has_vel_cmd = true;
+    car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
+    car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
 }
 
 void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg)
@@ -765,10 +767,10 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
                     msr::airlib::DrivetrainType::MaxDegreeOfFreedom, car_ros.vel_cmd.yaw_mode, car_ros.vehicle_name);
                 lck.unlock();
                 */
-                car_ros.controls.throttle = 0.5f;
-                car_ros.controls.steering = 0.0f;
+                //car_ros.controls.throttle = 0.5f;
+                //car_ros.controls.steering = 0.0f;
                 airsim_client_.setCarControls(car_ros.controls);
-                printf("############### CHECK POINT: car_ros.has_vel_cmd ###################");
+                //printf("############### CHECK POINT: car_ros.has_vel_cmd ###################");
             }
             // "clear" control cmds
             car_ros.has_vel_cmd = false;
