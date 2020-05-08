@@ -305,87 +305,6 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
 }
 
 // todo: error check. if state is not landed, return error. 
-/*
-bool AirsimCarROSWrapper::takeoff_srv_cb(airsim_ros_pkgs::Takeoff::Request& request, airsim_ros_pkgs::Takeoff::Response& response, const std::string& vehicle_name)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        airsim_client_.takeoffAsync(20, vehicle_name)->waitOnLastTask(); // todo value for timeout_sec? 
-        // response.success = 
-    else
-        airsim_client_.takeoffAsync(20, vehicle_name);
-        // response.success = 
-    return true;
-}
-
-bool AirsimCarROSWrapper::takeoff_group_srv_cb(airsim_ros_pkgs::TakeoffGroup::Request& request, airsim_ros_pkgs::TakeoffGroup::Response& response)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        for(const auto& vehicle_name : request.vehicle_names)
-            airsim_client_.takeoffAsync(20, vehicle_name)->waitOnLastTask(); // todo value for timeout_sec? 
-        // response.success = 
-    else
-        for(const auto& vehicle_name : request.vehicle_names)
-            airsim_client_.takeoffAsync(20, vehicle_name);
-        // response.success = 
-    return true;
-}
-
-bool AirsimCarROSWrapper::takeoff_all_srv_cb(airsim_ros_pkgs::Takeoff::Request& request, airsim_ros_pkgs::Takeoff::Response& response)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        for(const auto& vehicle_name : vehicle_names_)
-            airsim_client_.takeoffAsync(20, vehicle_name)->waitOnLastTask(); // todo value for timeout_sec? 
-        // response.success = 
-    else
-        for(const auto& vehicle_name : vehicle_names_)
-            airsim_client_.takeoffAsync(20, vehicle_name);
-        // response.success = 
-    return true;
-}
-
-bool AirsimCarROSWrapper::land_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response, const std::string& vehicle_name)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        airsim_client_.landAsync(60, vehicle_name)->waitOnLastTask();
-    else
-        airsim_client_.landAsync(60, vehicle_name);
-    return true; //todo
-}
-
-bool AirsimCarROSWrapper::land_group_srv_cb(airsim_ros_pkgs::LandGroup::Request& request, airsim_ros_pkgs::LandGroup::Response& response)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        for(const auto& vehicle_name : request.vehicle_names)
-            airsim_client_.landAsync(60, vehicle_name)->waitOnLastTask();
-    else
-        for(const auto& vehicle_name : request.vehicle_names)
-            airsim_client_.landAsync(60, vehicle_name);
-    return true; //todo
-}
-
-bool AirsimCarROSWrapper::land_all_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response)
-{
-    std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
-
-    if (request.waitOnLastTask)
-        for(const auto& vehicle_name : vehicle_names_)
-            airsim_client_.landAsync(60, vehicle_name)->waitOnLastTask();
-    else
-        for(const auto& vehicle_name : vehicle_names_)
-            airsim_client_.landAsync(60, vehicle_name);
-    return true; //todo
-}
-*/
 // todo add reset by vehicle_name API to airlib
 // todo not async remove waitonlasttask
 bool AirsimCarROSWrapper::reset_srv_cb(airsim_ros_pkgs::Reset::Request& request, airsim_ros_pkgs::Reset::Response& response)
@@ -417,18 +336,7 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
     //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
 
     int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
-
-    double roll, pitch, yaw;
-    tf2::Matrix3x3(get_tf2_quat(car_ros_vec_[vehicle_idx].curr_car_state.kinematics_estimated.pose.orientation)).getRPY(roll, pitch, yaw); // ros uses xyzw
-
     // todo do actual body frame?
-    car_ros_vec_[vehicle_idx].vel_cmd.x = (msg->twist.linear.x * cos(yaw)) - (msg->twist.linear.y * sin(yaw)); //body frame assuming zero pitch roll
-    car_ros_vec_[vehicle_idx].vel_cmd.y = (msg->twist.linear.x * sin(yaw)) + (msg->twist.linear.y * cos(yaw)); //body frame
-    car_ros_vec_[vehicle_idx].vel_cmd.z = msg->twist.linear.z;
-    car_ros_vec_[vehicle_idx].vel_cmd.drivetrain = msr::airlib::DrivetrainType::MaxDegreeOfFreedom;
-    car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.is_rate = true;
-    // airsim uses degrees
-    car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.yaw_or_rate = math_common::rad2deg(msg->twist.angular.z);
     car_ros_vec_[vehicle_idx].has_vel_cmd = true;
     car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
     car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
@@ -441,18 +349,9 @@ void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::Vel
     for(const auto& vehicle_name : msg.vehicle_names)
     {
         int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
-        double roll, pitch, yaw;
-        tf2::Matrix3x3(get_tf2_quat(car_ros_vec_[vehicle_idx].curr_car_state.kinematics_estimated.pose.orientation)).getRPY(roll, pitch, yaw); // ros uses xyzw
-
-        // todo do actual body frame?
-        car_ros_vec_[vehicle_idx].vel_cmd.x = (msg.twist.linear.x * cos(yaw)) - (msg.twist.linear.y * sin(yaw)); //body frame assuming zero pitch roll
-        car_ros_vec_[vehicle_idx].vel_cmd.y = (msg.twist.linear.x * sin(yaw)) + (msg.twist.linear.y * cos(yaw)); //body frame
-        car_ros_vec_[vehicle_idx].vel_cmd.z = msg.twist.linear.z;
-        car_ros_vec_[vehicle_idx].vel_cmd.drivetrain = msr::airlib::DrivetrainType::MaxDegreeOfFreedom;
-        car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.is_rate = true;
-        // airsim uses degrees
-        car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.yaw_or_rate = math_common::rad2deg(msg.twist.angular.z);
         car_ros_vec_[vehicle_idx].has_vel_cmd = true;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
     }
 }
 
@@ -465,18 +364,9 @@ void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCm
     for(const auto& vehicle_name : vehicle_names_)
     {
         int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
-        double roll, pitch, yaw;
-        tf2::Matrix3x3(get_tf2_quat(car_ros_vec_[vehicle_idx].curr_car_state.kinematics_estimated.pose.orientation)).getRPY(roll, pitch, yaw); // ros uses xyzw
-
-        // todo do actual body frame?
-        car_ros_vec_[vehicle_idx].vel_cmd.x = (msg.twist.linear.x * cos(yaw)) - (msg.twist.linear.y * sin(yaw)); //body frame assuming zero pitch roll
-        car_ros_vec_[vehicle_idx].vel_cmd.y = (msg.twist.linear.x * sin(yaw)) + (msg.twist.linear.y * cos(yaw)); //body frame
-        car_ros_vec_[vehicle_idx].vel_cmd.z = msg.twist.linear.z;
-        car_ros_vec_[vehicle_idx].vel_cmd.drivetrain = msr::airlib::DrivetrainType::MaxDegreeOfFreedom;
-        car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.is_rate = true;
-        // airsim uses degrees
-        car_ros_vec_[vehicle_idx].vel_cmd.yaw_mode.yaw_or_rate = math_common::rad2deg(msg.twist.angular.z);
         car_ros_vec_[vehicle_idx].has_vel_cmd = true;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
     }
 }
 
