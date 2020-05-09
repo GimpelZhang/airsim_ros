@@ -135,7 +135,7 @@ private:
     void lidar_timer_cb(const ros::TimerEvent& event);
 
     /// ROS subscriber callbacks
-    void vel_cmd_world_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name);
+    //void vel_cmd_world_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name);
     void vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name);
 
     void vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg);
