@@ -139,14 +139,14 @@ private:
     void vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name);
 
     void vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg);
-    void vel_cmd_group_world_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg);
+    //void vel_cmd_group_world_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg);
 
-    void vel_cmd_all_world_frame_cb(const airsim_ros_pkgs::VelCmd& msg);
+    //void vel_cmd_all_world_frame_cb(const airsim_ros_pkgs::VelCmd& msg);
     void vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCmd& msg);
 
     // void vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd& msg, const std::string& vehicle_name);
-    void gimbal_angle_quat_cmd_cb(const airsim_ros_pkgs::GimbalAngleQuatCmd& gimbal_angle_quat_cmd_msg);
-    void gimbal_angle_euler_cmd_cb(const airsim_ros_pkgs::GimbalAngleEulerCmd& gimbal_angle_euler_cmd_msg);
+    //void gimbal_angle_quat_cmd_cb(const airsim_ros_pkgs::GimbalAngleQuatCmd& gimbal_angle_quat_cmd_msg);
+    //void gimbal_angle_euler_cmd_cb(const airsim_ros_pkgs::GimbalAngleEulerCmd& gimbal_angle_euler_cmd_msg);
 
     // void set_zero_vel_cmd();
 

@@ -90,8 +90,8 @@ void AirsimCarROSWrapper::initialize_ros()
 void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
 {
     // subscribe to control commands on global nodehandle
-    gimbal_angle_quat_cmd_sub_ = nh_private_.subscribe("gimbal_angle_quat_cmd", 50, &AirsimCarROSWrapper::gimbal_angle_quat_cmd_cb, this);
-    gimbal_angle_euler_cmd_sub_ = nh_private_.subscribe("gimbal_angle_euler_cmd", 50, &AirsimCarROSWrapper::gimbal_angle_euler_cmd_cb, this);
+    //gimbal_angle_quat_cmd_sub_ = nh_private_.subscribe("gimbal_angle_quat_cmd", 50, &AirsimCarROSWrapper::gimbal_angle_quat_cmd_cb, this);
+    //gimbal_angle_euler_cmd_sub_ = nh_private_.subscribe("gimbal_angle_euler_cmd", 50, &AirsimCarROSWrapper::gimbal_angle_euler_cmd_cb, this);
     origin_geo_point_pub_ = nh_private_.advertise<airsim_ros_pkgs::GPSYaw>("origin_geo_point", 10);       
 
     airsim_img_request_vehicle_name_pair_vec_.clear();
@@ -132,8 +132,8 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
         // bind multiple topics to a single callback, but keep track of which vehicle name it was by passing curr_vehicle_name as the 2nd argument 
         car_ros.vel_cmd_body_frame_sub = nh_private_.subscribe<airsim_ros_pkgs::VelCmd>(curr_vehicle_name + "/vel_cmd_body_frame", 1, 
             boost::bind(&AirsimCarROSWrapper::vel_cmd_body_frame_cb, this, _1, car_ros.vehicle_name)); // todo ros::TransportHints().tcpNoDelay();
-        car_ros.vel_cmd_world_frame_sub = nh_private_.subscribe<airsim_ros_pkgs::VelCmd>(curr_vehicle_name + "/vel_cmd_world_frame", 1, 
-            boost::bind(&AirsimCarROSWrapper::vel_cmd_world_frame_cb, this, _1, car_ros.vehicle_name));
+        //car_ros.vel_cmd_world_frame_sub = nh_private_.subscribe<airsim_ros_pkgs::VelCmd>(curr_vehicle_name + "/vel_cmd_world_frame", 1, 
+        //    boost::bind(&AirsimCarROSWrapper::vel_cmd_world_frame_cb, this, _1, car_ros.vehicle_name));
 
         // car_ros.takeoff_srvr = nh_private_.advertiseService<airsim_ros_pkgs::Takeoff::Request, airsim_ros_pkgs::Takeoff::Response>(curr_vehicle_name + "/takeoff", 
             //boost::bind(&AirsimCarROSWrapper::takeoff_srv_cb, this, _1, _2, car_ros.vehicle_name) );
@@ -250,10 +250,10 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
         // gimbal_angle_quat_cmd_sub_ = nh_.subscribe("gimbal_angle_quat_cmd", 50, &AirsimCarROSWrapper::gimbal_angle_quat_cmd_cb, this);
 
         vel_cmd_all_body_frame_sub_ = nh_private_.subscribe("all_robots/vel_cmd_body_frame", 1, &AirsimCarROSWrapper::vel_cmd_all_body_frame_cb, this);
-        vel_cmd_all_world_frame_sub_ = nh_private_.subscribe("all_robots/vel_cmd_world_frame", 1, &AirsimCarROSWrapper::vel_cmd_all_world_frame_cb, this);
+        //vel_cmd_all_world_frame_sub_ = nh_private_.subscribe("all_robots/vel_cmd_world_frame", 1, &AirsimCarROSWrapper::vel_cmd_all_world_frame_cb, this);
 
         vel_cmd_group_body_frame_sub_ = nh_private_.subscribe("group_of_robots/vel_cmd_body_frame", 1, &AirsimCarROSWrapper::vel_cmd_group_body_frame_cb, this);
-        vel_cmd_group_world_frame_sub_ = nh_private_.subscribe("group_of_obots/vel_cmd_world_frame", 1, &AirsimCarROSWrapper::vel_cmd_group_world_frame_cb, this);
+        //vel_cmd_group_world_frame_sub_ = nh_private_.subscribe("group_of_obots/vel_cmd_world_frame", 1, &AirsimCarROSWrapper::vel_cmd_group_world_frame_cb, this);
 
         // takeoff_group_srvr_ = nh_private_.advertiseService("group_of_robots/takeoff", &AirsimCarROSWrapper::takeoff_group_srv_cb, this);
         // land_group_srvr_ = nh_private_.advertiseService("group_of_robots/land", &AirsimCarROSWrapper::land_group_srv_cb, this);
@@ -350,8 +350,8 @@ void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::Vel
     {
         int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
         car_ros_vec_[vehicle_idx].has_vel_cmd = true;
-        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
-        car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = msg.twist.angular.z;
     }
 }
 
@@ -365,11 +365,11 @@ void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCm
     {
         int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
         car_ros_vec_[vehicle_idx].has_vel_cmd = true;
-        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
-        car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = msg.twist.angular.z;
     }
 }
-
+/*
 void AirsimCarROSWrapper::vel_cmd_world_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name)
 {
     //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
@@ -463,7 +463,7 @@ void AirsimCarROSWrapper::gimbal_angle_euler_cmd_cb(const airsim_ros_pkgs::Gimba
         ROS_WARN("%s",ex.what());
     }
 }
-
+*/
 nav_msgs::Odometry AirsimCarROSWrapper::get_odom_msg_from_airsim_state(const msr::airlib::CarApiBase::CarState& car_state) const
 {
     nav_msgs::Odometry odom_ned_msg;
