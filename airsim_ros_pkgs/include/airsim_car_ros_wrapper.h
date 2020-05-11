@@ -196,13 +196,13 @@ private:
 private:
     // subscriber / services for ALL robots
     ros::Subscriber vel_cmd_all_body_frame_sub_;
-    ros::Subscriber vel_cmd_all_world_frame_sub_;
+    //ros::Subscriber vel_cmd_all_world_frame_sub_;
     // ros::ServiceServer takeoff_all_srvr_;
     // ros::ServiceServer land_all_srvr_;
 
     // todo - subscriber / services for a GROUP of robots, which is defined by a list of `vehicle_name`s passed in the ros msg / srv request
     ros::Subscriber vel_cmd_group_body_frame_sub_;
-    ros::Subscriber vel_cmd_group_world_frame_sub_;
+    //ros::Subscriber vel_cmd_group_world_frame_sub_;
     // ros::ServiceServer takeoff_group_srvr_;
     // ros::ServiceServer land_group_srvr_;
 
@@ -217,7 +217,7 @@ private:
         // ros::Publisher home_geo_point_pub_; // geo coord of unreal origin
 
         ros::Subscriber vel_cmd_body_frame_sub;
-        ros::Subscriber vel_cmd_world_frame_sub;
+        //ros::Subscriber vel_cmd_world_frame_sub;
 
         // ros::ServiceServer takeoff_srvr;
         // ros::ServiceServer land_srvr;
