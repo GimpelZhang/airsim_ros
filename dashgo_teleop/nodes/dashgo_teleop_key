@@ -31,7 +31,8 @@
 # March 2019
 
 import rospy
-from geometry_msgs.msg import Twist
+# from geometry_msgs.msg import Twist
+from airsim_ros_pkgs.msg import VelCmd
 import sys, select, termios, tty
 
 MAX_LIN_VEL = 0.8
@@ -106,7 +107,7 @@ if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
     rospy.init_node('dashgo_teleop')
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    pub = rospy.Publisher('cmd_vel', VelCmd, queue_size=10)
 
     status = 0
     target_linear_vel   = 0.0
@@ -148,23 +149,25 @@ if __name__=="__main__":
                 print msg
                 status = 0
 
-            twist = Twist()
+            # twist = Twist()
+            vel = VelCmd()
 
             control_linear_vel = makeSimpleProfile(control_linear_vel, target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel; twist.linear.y = 0.0; twist.linear.z = 0.0
+            vel.twist.linear.x = control_linear_vel; vel.twist.linear.y = 0.0; vel.twist.linear.z = 0.0
 
             control_angular_vel = makeSimpleProfile(control_angular_vel, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
-            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = control_angular_vel
+            vel.twist.angular.x = 0.0; vel.twist.angular.y = 0.0; vel.twist.angular.z = control_angular_vel
 
-            pub.publish(twist)
+            pub.publish(vel)
 
     except:
         print e
 
     finally:
-        twist = Twist()
-        twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
-        twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
-        pub.publish(twist)
+        # twist = Twist()
+        vel = VelCmd()
+        vel.twist.linear.x = 0.0; vel.twist.linear.y = 0.0; vel.twist.linear.z = 0.0
+        vel.twist.angular.x = 0.0; vel.twist.angular.y = 0.0; vel.twist.angular.z = 0.0
+        pub.publish(vel)
 
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)

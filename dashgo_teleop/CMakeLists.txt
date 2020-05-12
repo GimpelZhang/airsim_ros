@@ -47,7 +47,7 @@ catkin_install_python(PROGRAMS
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-
+# add_dependencies(dashgo_teleop ${catkin_EXPORTED_TARGETS})
 ################################################################################
 # Test
 ################################################################################

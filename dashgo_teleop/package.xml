@@ -11,6 +11,8 @@
   <maintainer email="zhangjunchuan@sineva.com">Junchuan Zhang</maintainer>
   <url type="repository"></url>
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>airsim_ros_pkgs</build_depend>
+  <exec_depend>airsim_ros_pkgs</exec_depend>
   <depend>rospy</depend>
   <depend>geometry_msgs</depend>
 </package>
