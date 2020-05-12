@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>dashgo_teleop</name>
+  <version>1.0.0</version>
+  <description>
+    Provides teleoperation using keyboard for Dashgo D1. Modified from turtlebot3_teleop
+  </description>
+  <license>BSD</license>
+  <author>Junchuan Zhang</author>
+  <author email="zhangjunchuan@sineva.com">Junchuan Zhang</author>
+  <maintainer email="zhangjunchuan@sineva.com">Junchuan Zhang</maintainer>
+  <url type="repository"></url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>geometry_msgs</depend>
+</package>

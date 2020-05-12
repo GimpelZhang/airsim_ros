@@ -1,0 +1,7 @@
+<launch>
+  <!-- dashgo_teleop_key already has its own built in velocity smoother -->
+  <arg name="cmd_vel_topic" default="/airsim_car_node/drone_1/vel_cmd_body_frame" />
+  <node pkg="dashgo_teleop" type="dashgo_teleop_key" name="dashgo_teleop_keyboard"  output="screen">
+    <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+  </node>
+</launch>
