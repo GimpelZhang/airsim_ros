@@ -2,7 +2,7 @@
 # Set minimum required version of cmake, project name and compile options
 ################################################################################
 cmake_minimum_required(VERSION 2.8.3)
-project(dashgo_teleop)
+project(airsim_car_teleop)
 
 ################################################################################
 # Find catkin packages and libraries for catkin and system dependencies
@@ -40,7 +40,7 @@ catkin_package(
 # Install
 ################################################################################
 catkin_install_python(PROGRAMS
-  nodes/dashgo_teleop_key
+  nodes/airsim_car_teleop_key
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
