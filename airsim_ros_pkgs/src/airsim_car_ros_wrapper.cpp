@@ -338,8 +338,27 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
     int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
     // todo do actual body frame?
     car_ros_vec_[vehicle_idx].has_vel_cmd = true;
-    car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
-    car_ros_vec_[vehicle_idx].controls.steering = msg->twist.angular.z;
+    if(msg->twist.linear.x == 0)
+    {
+        car_ros_vec_[vehicle_idx].controls.handbrake = true;
+    }
+    else if(msg->twist.linear.x>0)
+    {
+        car_ros_vec_[vehicle_idx].controls.handbrake = false;
+        car_ros_vec_[vehicle_idx].controls.is_manual_gear = false;
+        car_ros_vec_[vehicle_idx].controls.manual_gear = 0;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = -msg->twist.angular.z;
+    }
+    else
+    {
+        car_ros_vec_[vehicle_idx].controls.handbrake = false;
+        car_ros_vec_[vehicle_idx].controls.is_manual_gear = true;
+        car_ros_vec_[vehicle_idx].controls.manual_gear = -1;
+        car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
+        car_ros_vec_[vehicle_idx].controls.steering = -msg->twist.angular.z;
+    }
+    
 }
 
 void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg)
