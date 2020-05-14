@@ -341,10 +341,12 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
     if(msg->twist.linear.x == 0)
     {
         car_ros_vec_[vehicle_idx].controls.handbrake = true;
+        car_ros_vec_[vehicle_idx].controls.brake = 1;
     }
     else if(msg->twist.linear.x>0)
     {
         car_ros_vec_[vehicle_idx].controls.handbrake = false;
+        car_ros_vec_[vehicle_idx].controls.brake = 0;
         car_ros_vec_[vehicle_idx].controls.is_manual_gear = false;
         car_ros_vec_[vehicle_idx].controls.manual_gear = 0;
         car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
@@ -353,6 +355,7 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
     else
     {
         car_ros_vec_[vehicle_idx].controls.handbrake = false;
+        car_ros_vec_[vehicle_idx].controls.brake = 0;
         car_ros_vec_[vehicle_idx].controls.is_manual_gear = true;
         car_ros_vec_[vehicle_idx].controls.manual_gear = -1;
         car_ros_vec_[vehicle_idx].controls.throttle = msg->twist.linear.x;
@@ -372,10 +375,12 @@ void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::Vel
         if(msg.twist.linear.x == 0)
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = true;
+            car_ros_vec_[vehicle_idx].controls.brake = 1;
         }
         else if(msg.twist.linear.x>0)
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = false;
+            car_ros_vec_[vehicle_idx].controls.brake = 0;
             car_ros_vec_[vehicle_idx].controls.is_manual_gear = false;
             car_ros_vec_[vehicle_idx].controls.manual_gear = 0;
             car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;
@@ -384,6 +389,7 @@ void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::Vel
         else
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = false;
+            car_ros_vec_[vehicle_idx].controls.brake = 0;
             car_ros_vec_[vehicle_idx].controls.is_manual_gear = true;
             car_ros_vec_[vehicle_idx].controls.manual_gear = -1;
             car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;
@@ -405,10 +411,12 @@ void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCm
         if(msg.twist.linear.x == 0)
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = true;
+            car_ros_vec_[vehicle_idx].controls.brake = 1;
         }
         else if(msg.twist.linear.x>0)
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = false;
+            car_ros_vec_[vehicle_idx].controls.brake = 0;
             car_ros_vec_[vehicle_idx].controls.is_manual_gear = false;
             car_ros_vec_[vehicle_idx].controls.manual_gear = 0;
             car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;
@@ -417,6 +425,7 @@ void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCm
         else
         {
             car_ros_vec_[vehicle_idx].controls.handbrake = false;
+            car_ros_vec_[vehicle_idx].controls.brake = 0;
             car_ros_vec_[vehicle_idx].controls.is_manual_gear = true;
             car_ros_vec_[vehicle_idx].controls.manual_gear = -1;
             car_ros_vec_[vehicle_idx].controls.throttle = msg.twist.linear.x;

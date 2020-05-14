@@ -35,8 +35,8 @@ import rospy
 from airsim_ros_pkgs.msg import VelCmd
 import sys, select, termios, tty
 
-MAX_LIN_VEL = 0.8
-MAX_ANG_VEL = 2.0
+MAX_LIN_VEL = 1.0
+MAX_ANG_VEL = 1.0
 
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
@@ -49,8 +49,8 @@ Moving around:
    a    s    d
         x
 
-w/x : increase/decrease linear velocity ( ~ 0.8)
-a/d : increase/decrease angular velocity ( ~ 2.0)
+w/x : increase/decrease linear velocity ( ~ 1.0)
+a/d : increase/decrease angular velocity ( ~ 1.0)
 
 space key, s : force stop
 
