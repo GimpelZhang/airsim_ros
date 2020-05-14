@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>dashgo_teleop</name>
+  <name>airsim_car_teleop</name>
   <version>1.0.0</version>
   <description>
-    Provides teleoperation using keyboard for Dashgo D1. Modified from turtlebot3_teleop
+    Provides teleoperation using keyboard for airsim car models.
   </description>
   <license>BSD</license>
   <author>Junchuan Zhang</author>

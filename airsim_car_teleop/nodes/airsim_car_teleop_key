@@ -27,7 +27,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Modified by Junchuan Zhang for the Dashgo D1 robot
+# Modified by Junchuan Zhang for the airsim car model.
 # March 2019
 
 import rospy
@@ -35,22 +35,22 @@ import rospy
 from airsim_ros_pkgs.msg import VelCmd
 import sys, select, termios, tty
 
-MAX_LIN_VEL = 0.8
-MAX_ANG_VEL = 2.0
+MAX_LIN_VEL = 1.0
+MAX_ANG_VEL = 1.0
 
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
 
 msg = """
-Control the Dashgo D1!
+Control the Airsim Car. 
 ---------------------------
 Moving around:
         w
    a    s    d
         x
 
-w/x : increase/decrease linear velocity ( ~ 0.8)
-a/d : increase/decrease angular velocity ( ~ 2.0)
+w/x : increase/decrease linear velocity ( ~ 1.0)
+a/d : increase/decrease angular velocity ( ~ 1.0)
 
 space key, s : force stop
 
@@ -106,7 +106,7 @@ def checkAngularLimitVelocity(vel):
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
-    rospy.init_node('dashgo_teleop')
+    rospy.init_node('airsim_car_teleop')
     pub = rospy.Publisher('cmd_vel', VelCmd, queue_size=10)
 
     status = 0
