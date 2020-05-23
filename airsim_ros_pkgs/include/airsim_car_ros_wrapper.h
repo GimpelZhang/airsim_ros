@@ -116,7 +116,7 @@ struct GimbalCmd
 class AirsimCarROSWrapper
 {
 public:
-    AirsimCarROSWrapper(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
+    AirsimCarROSWrapper(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, const std::string & host_ip);
     ~AirsimCarROSWrapper() {}; 
 
     void initialize_airsim();
@@ -127,6 +127,9 @@ public:
     ros::AsyncSpinner lidar_async_spinner_;
     bool is_used_lidar_timer_cb_queue_;
     bool is_used_img_timer_cb_queue_;
+
+    ros::Time first_imu_ros_ts;
+    int64_t first_imu_unreal_ts = -1;
 
 private:
     /// ROS timer callbacks
@@ -147,7 +150,7 @@ private:
     // void vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd& msg, const std::string& vehicle_name);
     //void gimbal_angle_quat_cmd_cb(const airsim_ros_pkgs::GimbalAngleQuatCmd& gimbal_angle_quat_cmd_msg);
     //void gimbal_angle_euler_cmd_cb(const airsim_ros_pkgs::GimbalAngleEulerCmd& gimbal_angle_euler_cmd_msg);
-
+    ros::Time make_ts(uint64_t unreal_ts);
     // void set_zero_vel_cmd();
 
     /// ROS service callbacks
@@ -166,8 +169,8 @@ private:
     /// camera helper methods
     sensor_msgs::CameraInfo generate_cam_info(const std::string& camera_name, const CameraSetting& camera_setting, const CaptureSetting& capture_setting) const;
     cv::Mat manual_decode_depth(const ImageResponse& img_response) const;
-    sensor_msgs::ImagePtr get_img_msg_from_response(const ImageResponse& img_response, const ros::Time curr_ros_time, const std::string frame_id) const;
-    sensor_msgs::ImagePtr get_depth_img_msg_from_response(const ImageResponse& img_response, const ros::Time curr_ros_time, const std::string frame_id) const;
+    sensor_msgs::ImagePtr get_img_msg_from_response(const ImageResponse& img_response, const ros::Time curr_ros_time, const std::string frame_id);
+    sensor_msgs::ImagePtr get_depth_img_msg_from_response(const ImageResponse& img_response, const ros::Time curr_ros_time, const std::string frame_id);
     void process_and_publish_img_response(const std::vector<ImageResponse>& img_response_vec, const int img_response_idx, const std::string& vehicle_name);
 
     // methods which parse setting json ang generate ros pubsubsrv
@@ -186,7 +189,7 @@ private:
     nav_msgs::Odometry get_odom_msg_from_airsim_state(const msr::airlib::CarApiBase::CarState& car_state) const;
     airsim_ros_pkgs::GPSYaw get_gps_msg_from_airsim_geo_point(const msr::airlib::GeoPoint& geo_point) const;
     sensor_msgs::NavSatFix get_gps_sensor_msg_from_airsim_geo_point(const msr::airlib::GeoPoint& geo_point) const;
-    sensor_msgs::Imu get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data) const;
+    sensor_msgs::Imu get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data);
     sensor_msgs::PointCloud2 get_lidar_msg_from_airsim(const msr::airlib::LidarData& lidar_data) const;
 
     // not used anymore, but can be useful in future with an unreal camera calibration environment
