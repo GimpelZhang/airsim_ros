@@ -999,6 +999,9 @@ sensor_msgs::ImagePtr AirsimCarROSWrapper::get_img_msg_from_response(const Image
     img_msg_ptr->data = img_response.image_data_uint8;
     img_msg_ptr->step = img_response.width * 3; // todo un-hardcode. image_width*num_bytes
     img_msg_ptr->header.stamp = make_ts(img_response.time_stamp);
+    //ROS_INFO("%d",img_msg_ptr->header.stamp.sec);
+    //ROS_INFO("%d",img_msg_ptr->header.stamp.nsec);
+    ROS_INFO("%lu",img_response.time_stamp);
     img_msg_ptr->header.frame_id = frame_id;
     img_msg_ptr->height = img_response.height;
     img_msg_ptr->width = img_response.width;
@@ -1059,7 +1062,8 @@ void AirsimCarROSWrapper::process_and_publish_img_response(const std::vector<Ima
         // msr::airlib::CameraInfo camera_info = airsim_client_.simGetCameraInfo(curr_img_response.camera_name);
 
         // update timestamp of saved cam info msgs
-        camera_info_msg_vec_[img_response_idx_internal].header.stamp = curr_ros_time;
+        //camera_info_msg_vec_[img_response_idx_internal].header.stamp = curr_ros_time;
+        camera_info_msg_vec_[img_response_idx_internal].header.stamp = make_ts(curr_img_response.time_stamp);
         cam_info_pub_vec_[img_response_idx_internal].publish(camera_info_msg_vec_[img_response_idx_internal]);
 
         // DepthPlanner / DepthPerspective / DepthVis / DisparityNormalized
