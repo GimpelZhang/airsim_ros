@@ -24,11 +24,14 @@ const std::unordered_map<int, std::string> AirsimCarROSWrapper::image_type_int_t
     { 7, "Infrared" }
 };
 
-AirsimCarROSWrapper::AirsimCarROSWrapper(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private) : 
+AirsimCarROSWrapper::AirsimCarROSWrapper(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, const std::string & host_ip) : 
     nh_(nh), 
     nh_private_(nh_private),
     img_async_spinner_(1, &img_timer_cb_queue_), // a thread for image callbacks to be 'spun' by img_async_spinner_ 
-    lidar_async_spinner_(1, &lidar_timer_cb_queue_) // same as above, but for lidar
+    lidar_async_spinner_(1, &lidar_timer_cb_queue_), // same as above, but for lidar
+    airsim_client_(host_ip),
+    airsim_client_images_(host_ip),
+    airsim_client_lidar_(host_ip)
 {
     is_used_lidar_timer_cb_queue_ = false;
     is_used_img_timer_cb_queue_ = false;
@@ -303,7 +306,13 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
 
     initialize_airsim();
 }
-
+ros::Time AirsimCarROSWrapper::make_ts(uint64_t unreal_ts) {
+    if (first_imu_unreal_ts < 0) {
+        first_imu_unreal_ts = unreal_ts;
+        first_imu_ros_ts = ros::Time::now();
+    }
+    return  first_imu_ros_ts + ros::Duration( (unreal_ts- first_imu_unreal_ts)/1e9);
+}
 // todo: error check. if state is not landed, return error. 
 // todo add reset by vehicle_name API to airlib
 // todo not async remove waitonlasttask
@@ -605,7 +614,7 @@ sensor_msgs::PointCloud2 AirsimCarROSWrapper::get_lidar_msg_from_airsim(const ms
 }
 
 // todo covariances
-sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data) const
+sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data)
 {
     sensor_msgs::Imu imu_msg;
     // imu_msg.header.frame_id = "/airsim/odom_local_ned";// todo multiple cars
@@ -615,15 +624,15 @@ sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib:
     imu_msg.orientation.w = imu_data.orientation.w();
 
     // todo radians per second
-    imu_msg.angular_velocity.x = math_common::deg2rad(imu_data.angular_velocity.x());
-    imu_msg.angular_velocity.y = math_common::deg2rad(imu_data.angular_velocity.y());
-    imu_msg.angular_velocity.z = math_common::deg2rad(imu_data.angular_velocity.z());
+    imu_msg.angular_velocity.x = imu_data.angular_velocity.x();
+    imu_msg.angular_velocity.y = imu_data.angular_velocity.y();
+    imu_msg.angular_velocity.z = imu_data.angular_velocity.z();
 
     // meters/s2^m 
     imu_msg.linear_acceleration.x = imu_data.linear_acceleration.x();
     imu_msg.linear_acceleration.y = imu_data.linear_acceleration.y();
     imu_msg.linear_acceleration.z = imu_data.linear_acceleration.z();
-
+    imu_msg.header.stamp = make_ts(imu_data.time_stamp);
     // imu_msg.orientation_covariance = ;
     // imu_msg.angular_velocity_covariance = ;
     // imu_msg.linear_acceleration_covariance = ;
@@ -741,7 +750,7 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
                 //lck.unlock();
                 sensor_msgs::Imu imu_msg = get_imu_msg_from_airsim(imu_data);
                 imu_msg.header.frame_id = vehicle_imu_pair.first;
-                imu_msg.header.stamp = ros::Time::now();
+                //imu_msg.header.stamp = ros::Time::now();
                 imu_pub_vec_[ctr].publish(imu_msg);
                 ctr++;
             } 
@@ -755,7 +764,8 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
                 static_tf_pub_.sendTransform(static_tf_msg);
             }
         }
-
+        // we've sent these static transforms, so no need to keep sending them
+        static_tf_msg_vec_.clear();
         // todo add and expose a gimbal angular velocity to airlib
         if (has_gimbal_cmd_)
         {
@@ -983,14 +993,15 @@ cv::Mat AirsimCarROSWrapper::manual_decode_depth(const ImageResponse& img_respon
     return mat;
 }
 
-sensor_msgs::ImagePtr AirsimCarROSWrapper::get_img_msg_from_response(const ImageResponse& img_response,
-                                                                const ros::Time curr_ros_time, 
-                                                                const std::string frame_id) const
+sensor_msgs::ImagePtr AirsimCarROSWrapper::get_img_msg_from_response(const ImageResponse& img_response,const ros::Time curr_ros_time,const std::string frame_id) 
 {
     sensor_msgs::ImagePtr img_msg_ptr = boost::make_shared<sensor_msgs::Image>();
     img_msg_ptr->data = img_response.image_data_uint8;
     img_msg_ptr->step = img_response.width * 3; // todo un-hardcode. image_width*num_bytes
-    img_msg_ptr->header.stamp = curr_ros_time;
+    img_msg_ptr->header.stamp = make_ts(img_response.time_stamp);
+    //ROS_INFO("%d",img_msg_ptr->header.stamp.sec);
+    //ROS_INFO("%d",img_msg_ptr->header.stamp.nsec);
+    ROS_INFO("%lu",img_response.time_stamp);
     img_msg_ptr->header.frame_id = frame_id;
     img_msg_ptr->height = img_response.height;
     img_msg_ptr->width = img_response.width;
@@ -1001,23 +1012,19 @@ sensor_msgs::ImagePtr AirsimCarROSWrapper::get_img_msg_from_response(const Image
     return img_msg_ptr;
 }
 
-sensor_msgs::ImagePtr AirsimCarROSWrapper::get_depth_img_msg_from_response(const ImageResponse& img_response,
-                                                                        const ros::Time curr_ros_time,
-                                                                        const std::string frame_id) const
+sensor_msgs::ImagePtr AirsimCarROSWrapper::get_depth_img_msg_from_response(const ImageResponse& img_response,const ros::Time curr_ros_time,const std::string frame_id)
 {
     // todo using img_response.image_data_float direclty as done get_img_msg_from_response() throws an error, 
     // hence the dependency on opencv and cv_bridge. however, this is an extremely fast op, so no big deal.
     cv::Mat depth_img = manual_decode_depth(img_response);
     sensor_msgs::ImagePtr depth_img_msg = cv_bridge::CvImage(std_msgs::Header(), "32FC1", depth_img).toImageMsg();
-    depth_img_msg->header.stamp = curr_ros_time;
+    depth_img_msg->header.stamp = make_ts(img_response.time_stamp);
     depth_img_msg->header.frame_id = frame_id;
     return depth_img_msg;
 }
 
 // todo have a special stereo pair mode and get projection matrix by calculating offset wrt car body frame?
-sensor_msgs::CameraInfo AirsimCarROSWrapper::generate_cam_info(const std::string& camera_name,
-                                                            const CameraSetting& camera_setting,
-                                                            const CaptureSetting& capture_setting) const
+sensor_msgs::CameraInfo AirsimCarROSWrapper::generate_cam_info(const std::string& camera_name,const CameraSetting& camera_setting,const CaptureSetting& capture_setting) const
 {
     sensor_msgs::CameraInfo cam_info_msg;
     cam_info_msg.header.frame_id = camera_name + "/" + image_type_int_to_string_map_.at(capture_setting.image_type) + "_optical";
@@ -1043,6 +1050,10 @@ void AirsimCarROSWrapper::process_and_publish_img_response(const std::vector<Ima
 
     for (const auto& curr_img_response : img_response_vec)
     {
+        // if a render request failed for whatever reason, this img will be empty.
+        // Attempting to use a make_ts(0) results in ros::Duration runtime error.
+        if (curr_img_response.time_stamp == 0) continue;
+
         // todo publishing a tf for each capture type seems stupid. but it foolproofs us against render thread's async stuff, I hope. 
         // Ideally, we should loop over cameras and then captures, and publish only one tf.  
         publish_camera_tf(curr_img_response, curr_ros_time, vehicle_name, curr_img_response.camera_name);
@@ -1051,7 +1062,8 @@ void AirsimCarROSWrapper::process_and_publish_img_response(const std::vector<Ima
         // msr::airlib::CameraInfo camera_info = airsim_client_.simGetCameraInfo(curr_img_response.camera_name);
 
         // update timestamp of saved cam info msgs
-        camera_info_msg_vec_[img_response_idx_internal].header.stamp = curr_ros_time;
+        //camera_info_msg_vec_[img_response_idx_internal].header.stamp = curr_ros_time;
+        camera_info_msg_vec_[img_response_idx_internal].header.stamp = make_ts(curr_img_response.time_stamp);
         cam_info_pub_vec_[img_response_idx_internal].publish(camera_info_msg_vec_[img_response_idx_internal]);
 
         // DepthPlanner / DepthPerspective / DepthVis / DisparityNormalized
