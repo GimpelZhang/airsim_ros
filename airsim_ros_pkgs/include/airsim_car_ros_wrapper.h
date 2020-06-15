@@ -53,6 +53,8 @@ STRICT_MODE_ON
 #include <tf2_ros/transform_listener.h>
 #include <unordered_map>
 #include "vehicles/car/api/CarRpcLibClient.hpp"
+#include <sensor_msgs/Joy.h>
+#include <geometry_msgs/QuaternionStamped.h>
 // #include "nodelet/nodelet.h"
 
 // todo move airlib typedefs to separate header file?
@@ -135,6 +137,7 @@ private:
     /// ROS timer callbacks
     void img_response_timer_cb(const ros::TimerEvent& event); // update images from airsim_client_ every nth sec
     void car_state_timer_cb(const ros::TimerEvent& event); // update drone state from airsim_client_ every nth sec
+    void car_imu_timer_cb(const ros::TimerEvent& event); // update drone state from airsim_client_ every nth sec
     void lidar_timer_cb(const ros::TimerEvent& event);
 
     /// ROS subscriber callbacks
@@ -186,12 +189,12 @@ private:
     tf2::Quaternion get_tf2_quat(const msr::airlib::Quaternionr& airlib_quat) const;
     msr::airlib::Quaternionr get_airlib_quat(const geometry_msgs::Quaternion& geometry_msgs_quat) const;
     msr::airlib::Quaternionr get_airlib_quat(const tf2::Quaternion& tf2_quat) const;
-    nav_msgs::Odometry get_odom_msg_from_airsim_state(const msr::airlib::CarApiBase::CarState& car_state) const;
+    nav_msgs::Odometry get_odom_msg_from_airsim_state(const msr::airlib::CarApiBase::CarState& car_state);
     airsim_ros_pkgs::GPSYaw get_gps_msg_from_airsim_geo_point(const msr::airlib::GeoPoint& geo_point) const;
     sensor_msgs::NavSatFix get_gps_sensor_msg_from_airsim_geo_point(const msr::airlib::GeoPoint& geo_point) const;
     sensor_msgs::Imu get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data);
     sensor_msgs::PointCloud2 get_lidar_msg_from_airsim(const msr::airlib::LidarData& lidar_data) const;
-
+    geometry_msgs::QuaternionStamped get_attitude_from_airsim_state(const msr::airlib::CarApiBase::CarState& car_state);
     // not used anymore, but can be useful in future with an unreal camera calibration environment
     void read_params_from_yaml_and_fill_cam_info_msg(const std::string& file_name, sensor_msgs::CameraInfo& cam_info) const;
     void convert_yaml_to_simple_mat(const YAML::Node& node, SimpleMatrix& m) const; // todo ugly
@@ -218,20 +221,28 @@ private:
         ros::Publisher odom_local_ned_pub;
         ros::Publisher global_gps_pub;
         // ros::Publisher home_geo_point_pub_; // geo coord of unreal origin
+        ros::Publisher attitude_pub;
+        ros::Publisher depth_camera_pub;
 
+        ros::Publisher control_device_pub;
+        ros::Publisher flight_status_pub;
+        ros::Publisher rcdata_pub;
         ros::Subscriber vel_cmd_body_frame_sub;
         //ros::Subscriber vel_cmd_world_frame_sub;
-
+        ros::Subscriber control_sub;
         // ros::ServiceServer takeoff_srvr;
         // ros::ServiceServer land_srvr;
-
+        sensor_msgs::Joy rc;
         /// State
         msr::airlib::CarApiBase::CarState curr_car_state;
         msr::airlib::CarApiBase::CarControls controls;
         // bool in_air_; // todo change to "status" and keep track of this
         nav_msgs::Odometry curr_odom_ned;
+        geometry_msgs::QuaternionStamped curr_attitude;
         sensor_msgs::NavSatFix gps_sensor_msg;
-        bool has_vel_cmd;
+        //bool has_vel_cmd;
+        bool has_vel_cmd = false;
+        bool has_atti_cmd = false;
         VelCmd vel_cmd;
 
         std::string odom_frame_id;
@@ -292,10 +303,14 @@ private:
     ros::Timer airsim_img_response_timer_;
     ros::Timer airsim_control_update_timer_;
     ros::Timer airsim_lidar_update_timer_;
+    ros::Timer airsim_imu_update_timer_;
 
     typedef std::pair<std::vector<ImageRequest>, std::string> airsim_img_request_vehicle_name_pair;
     std::vector<airsim_img_request_vehicle_name_pair> airsim_img_request_vehicle_name_pair_vec_;
     std::vector<image_transport::Publisher> image_pub_vec_; 
+    std::vector<ros::Publisher> image_pose_pub_vec_; 
+    std::vector<std::pair<Eigen::Quaterniond, Eigen::Vector3d> > camera_extrinsic;
+    std::vector<int > multirotor_ros_index_vec_;
     std::vector<ros::Publisher> cam_info_pub_vec_;
     std::vector<ros::Publisher> lidar_pub_vec_;
     std::vector<ros::Publisher> imu_pub_vec_;
