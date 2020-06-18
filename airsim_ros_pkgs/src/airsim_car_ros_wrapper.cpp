@@ -148,7 +148,6 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
         // bind to a single callback. todo optimal subs queue length
         // bind multiple topics to a single callback, but keep track of which vehicle name it was by passing curr_vehicle_name as the 2nd argument 
         car_ros.flight_status_pub = nh_private_.advertise<std_msgs::UInt8>(curr_vehicle_name + "/flight_status", 1);
-        car_ros.rcdata_pub = nh_private_.advertise<sensor_msgs::Joy>(curr_vehicle_name + "/rc", 1);
         car_ros.vel_cmd_body_frame_sub = nh_private_.subscribe<airsim_ros_pkgs::VelCmd>(curr_vehicle_name + "/vel_cmd_body_frame", 1, 
             boost::bind(&AirsimCarROSWrapper::vel_cmd_body_frame_cb, this, _1, car_ros.vehicle_name)); // todo ros::TransportHints().tcpNoDelay();
         //car_ros.vel_cmd_world_frame_sub = nh_private_.subscribe<airsim_ros_pkgs::VelCmd>(curr_vehicle_name + "/vel_cmd_world_frame", 1, 
@@ -786,7 +785,7 @@ void AirsimCarROSWrapper::car_imu_timer_cb(const ros::TimerEvent& event)
             {
                 //std::unique_lock<std::recursive_mutex> lck(drone_control_mutex_);
                 auto imu_data = airsim_client_.getImuData(vehicle_imu_pair.second, vehicle_imu_pair.first);
-                lck.unlock();
+                //lck.unlock();
                 sensor_msgs::Imu imu_msg = get_imu_msg_from_airsim(imu_data);
                 imu_msg.header.frame_id = vehicle_imu_pair.first;
                 imu_pub_vec_[ctr].publish(imu_msg);
@@ -835,33 +834,12 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
             car_ros.global_gps_pub.publish(car_ros.gps_sensor_msg);
 
             // send control commands from the last callback to airsim
-            auto _rc_data = car_ros.curr_car_state.rc_data;
-            auto & rc = car_ros.rc;
-            if (rc.axes.size() < 6) {
-                rc.axes.push_back(_rc_data.roll*10000);
-                rc.axes.push_back(_rc_data.pitch*10000);
-                rc.axes.push_back(_rc_data.yaw*10000);
-                rc.axes.push_back((_rc_data.throttle - 0.5)*20000);
-                rc.axes.push_back(10000);
-                rc.axes.push_back(-10000); 
-            } else {
-                rc.axes[0] = _rc_data.roll*10000;
-                rc.axes[1] = _rc_data.pitch*10000;
-                rc.axes[3] = (_rc_data.throttle - 0.5)*20000;
-                rc.axes[2] = _rc_data.yaw*10000;
-            }
-
-            car_ros.rcdata_pub.publish(rc);
 
             static int _flight_status_count = 0;
             if (_flight_status_count ++ % 10 == 0) {
                 /*FLight status*/
                 std_msgs::UInt8 _flight_status;
-                if (car_ros.curr_car_state.landed_state > msr::airlib::LandedState::Landed) {
-                    _flight_status.data = 2;
-                } else {
-                    _flight_status.data = 0;
-                }
+                _flight_status.data = 0;
                 car_ros.flight_status_pub.publish(_flight_status);
             }
             if (car_ros.has_vel_cmd)

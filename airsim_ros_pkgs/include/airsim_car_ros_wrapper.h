@@ -226,13 +226,13 @@ private:
 
         ros::Publisher control_device_pub;
         ros::Publisher flight_status_pub;
-        ros::Publisher rcdata_pub;
+        //ros::Publisher rcdata_pub;
         ros::Subscriber vel_cmd_body_frame_sub;
         //ros::Subscriber vel_cmd_world_frame_sub;
         ros::Subscriber control_sub;
         // ros::ServiceServer takeoff_srvr;
         // ros::ServiceServer land_srvr;
-        sensor_msgs::Joy rc;
+        //sensor_msgs::Joy rc;
         /// State
         msr::airlib::CarApiBase::CarState curr_car_state;
         msr::airlib::CarApiBase::CarControls controls;
@@ -310,7 +310,7 @@ private:
     std::vector<image_transport::Publisher> image_pub_vec_; 
     std::vector<ros::Publisher> image_pose_pub_vec_; 
     std::vector<std::pair<Eigen::Quaterniond, Eigen::Vector3d> > camera_extrinsic;
-    std::vector<int > multirotor_ros_index_vec_;
+    std::vector<int > car_ros_index_vec_;
     std::vector<ros::Publisher> cam_info_pub_vec_;
     std::vector<ros::Publisher> lidar_pub_vec_;
     std::vector<ros::Publisher> imu_pub_vec_;
