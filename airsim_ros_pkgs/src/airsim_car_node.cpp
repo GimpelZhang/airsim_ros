@@ -22,6 +22,8 @@ int main(int argc, char ** argv)
         airsim_car_ros_wrapper.lidar_async_spinner_.start();
     }
 
+    //ros::MultiThreadedSpinner spinner(4); // Use 4 threads
+    //spinner.spin();
     ros::spin();
 
     return 0;
