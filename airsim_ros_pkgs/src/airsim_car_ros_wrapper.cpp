@@ -1134,7 +1134,7 @@ sensor_msgs::ImagePtr AirsimCarROSWrapper::get_img_msg_from_response(const Image
     img_msg_ptr->header.stamp = make_ts(img_response.time_stamp);
     //ROS_INFO("%d",img_msg_ptr->header.stamp.sec);
     //ROS_INFO("%d",img_msg_ptr->header.stamp.nsec);
-    ROS_INFO("%lu",img_response.time_stamp);
+    //ROS_INFO("%lu",img_response.time_stamp);
     img_msg_ptr->header.frame_id = frame_id;
     img_msg_ptr->height = img_response.height;
     img_msg_ptr->width = img_response.width;
