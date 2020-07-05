@@ -1,0 +1,62 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Car",
+  "ViewMode": "SpringArmChase",
+  "PhysicsEngineName": "FastPhysicsEngine",
+  "ClockType": "SteppableClock",
+  "ClockSpeed": 1,
+  "Vehicles": {
+    "drone_1": {
+      "VehicleType": "PhysXCar",
+      "DefaultVehicleState": "Armed",
+      "EnableCollisionPassthrogh": false,
+      "EnableCollisions": true,
+      "AllowAPIAlways": true,
+      "RC": {
+        "RemoteControlID": 0,
+        "AllowAPIWhenDisconnected": false
+      },
+      "Sensors": {
+        "Imu" : {
+          "SensorType": 2,
+          "Enabled": true
+        }
+      },
+     "Cameras": {
+        "leftcamera_1": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 640,
+              "Height": 480,
+              "FOV_Degrees": 90,
+              "TargetGamma": 1.5
+            }
+          ],
+          "X": 1.6, "Y": -0.06, "Z": -1.6,
+          "Pitch": 0, "Roll": 0, "Yaw": 0
+        },
+        "rightcamera_1": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 640,
+              "Height": 480,
+              "FOV_Degrees": 90,
+              "TargetGamma": 1.5
+            }
+          ],
+          "X": 1.6, "Y": 0.06, "Z": -1.6,
+          "Pitch": 0, "Roll": 0, "Yaw": 0
+        }
+      },
+      "X": 2, "Y": 0, "Z": 0,
+      "Pitch": 0, "Roll": 0, "Yaw": 0
+    }
+  },
+  "SubWindows": [
+    {"WindowID": 1, "ImageType": 0, "CameraName": "leftcamera_1", "Visible": false},
+    {"WindowID": 2, "ImageType": 0, "CameraName": "rightcamera_1", "Visible": false}
+  ]
+}

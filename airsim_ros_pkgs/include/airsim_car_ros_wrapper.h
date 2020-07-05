@@ -282,7 +282,7 @@ private:
     ros::CallbackQueue lidar_timer_cb_queue_;
 
     // todo race condition
-    // std::recursive_mutex car_control_mutex_;
+    std::recursive_mutex car_control_mutex_;
     // std::recursive_mutex img_mutex_;
     // std::recursive_mutex lidar_mutex_;
 
