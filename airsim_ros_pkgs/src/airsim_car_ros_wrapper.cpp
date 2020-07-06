@@ -720,16 +720,16 @@ sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib:
     // imu_msg.angular_velocity.x = imu_data.angular_velocity.x();
     // imu_msg.angular_velocity.y = imu_data.angular_velocity.y();
     // imu_msg.angular_velocity.z = imu_data.angular_velocity.z();
-    imu_msg.angular_velocity.x = (imu_data.angular_velocity.x());
-    imu_msg.angular_velocity.y = -(imu_data.angular_velocity.y());
-    imu_msg.angular_velocity.z = -(imu_data.angular_velocity.z());
+    imu_msg.angular_velocity.x = (imu_data.angular_velocity.y());
+    imu_msg.angular_velocity.y = -(imu_data.angular_velocity.z());
+    imu_msg.angular_velocity.z = -(imu_data.angular_velocity.x());
 
     // meters/s2^m 
     //imu_msg.linear_acceleration.x = imu_data.linear_acceleration.x();
-    imu_msg.linear_acceleration.x = -imu_data.linear_acceleration.x();
-    imu_msg.linear_acceleration.y = imu_data.linear_acceleration.y();
+    imu_msg.linear_acceleration.x = imu_data.linear_acceleration.y();
+    imu_msg.linear_acceleration.y = -imu_data.linear_acceleration.z();
     //imu_msg.linear_acceleration.z = imu_data.linear_acceleration.z();
-    imu_msg.linear_acceleration.z = -imu_data.linear_acceleration.z();
+    imu_msg.linear_acceleration.z = -imu_data.linear_acceleration.x();
     imu_msg.header.stamp = make_ts(imu_data.time_stamp);
     // imu_msg.orientation_covariance = ;
     // imu_msg.angular_velocity_covariance = ;
