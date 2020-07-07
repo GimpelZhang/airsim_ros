@@ -341,6 +341,7 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
     }
 
     initialize_airsim();
+    ROS_INFO("End 2. **");
 }
 // ros::Time AirsimCarROSWrapper::make_ts(uint64_t unreal_ts) {
 //     if (first_imu_unreal_ts < 0) {
@@ -354,7 +355,7 @@ void AirsimCarROSWrapper::create_ros_pubs_from_settings_json()
 // todo not async remove waitonlasttask
 bool AirsimCarROSWrapper::reset_srv_cb(airsim_ros_pkgs::Reset::Request& request, airsim_ros_pkgs::Reset::Response& response)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
+    std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     airsim_client_.reset();
     return true; //todo
@@ -378,7 +379,7 @@ msr::airlib::Quaternionr AirsimCarROSWrapper::get_airlib_quat(const tf2::Quatern
 // void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd& msg, const std::string& vehicle_name)
 void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+    std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
     // todo do actual body frame?
@@ -411,7 +412,7 @@ void AirsimCarROSWrapper::vel_cmd_body_frame_cb(const airsim_ros_pkgs::VelCmd::C
 
 void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+    std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     for(const auto& vehicle_name : msg.vehicle_names)
     {
@@ -446,7 +447,7 @@ void AirsimCarROSWrapper::vel_cmd_group_body_frame_cb(const airsim_ros_pkgs::Vel
 // void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg)
 void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCmd& msg)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+    std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     // todo expose waitOnLastTask or nah?
     for(const auto& vehicle_name : vehicle_names_)
@@ -481,7 +482,7 @@ void AirsimCarROSWrapper::vel_cmd_all_body_frame_cb(const airsim_ros_pkgs::VelCm
 /*
 void AirsimCarROSWrapper::vel_cmd_world_frame_cb(const airsim_ros_pkgs::VelCmd::ConstPtr& msg, const std::string& vehicle_name)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     int vehicle_idx = vehicle_name_idx_map_[vehicle_name];
 
@@ -497,7 +498,7 @@ void AirsimCarROSWrapper::vel_cmd_world_frame_cb(const airsim_ros_pkgs::VelCmd::
 // this is kinda unnecessary but maybe it makes life easier for the end user. 
 void AirsimCarROSWrapper::vel_cmd_group_world_frame_cb(const airsim_ros_pkgs::VelCmdGroup& msg)
 {
-   // std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+   // std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     for(const auto& vehicle_name : msg.vehicle_names)
     {
@@ -515,7 +516,7 @@ void AirsimCarROSWrapper::vel_cmd_group_world_frame_cb(const airsim_ros_pkgs::Ve
 
 void AirsimCarROSWrapper::vel_cmd_all_world_frame_cb(const airsim_ros_pkgs::VelCmd& msg)
 {
-    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+    //std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
     // todo expose waitOnLastTask or nah?
     for(const auto& vehicle_name : vehicle_names_)
@@ -605,6 +606,8 @@ nav_msgs::Odometry AirsimCarROSWrapper::get_odom_msg_from_airsim_state(const msr
     odom_ned_msg.twist.twist.angular.z = car_state.kinematics_estimated.twist.angular.z();
     */
 //FLU 
+    //ROS_INFO("Begin 11. ");
+    //ROS_INFO("Car State time: %lu",car_state.timestamp);
     nav_msgs::Odometry odom_flu_msg;
     odom_flu_msg.header.stamp = make_ts(car_state.timestamp);
     odom_flu_msg.header.frame_id = world_frame_id_;
@@ -692,11 +695,20 @@ ros::Time AirsimCarROSWrapper::make_ts(uint64_t unreal_ts) {
         first_imu_unreal_ts = unreal_ts;
         first_imu_ros_ts = ros::Time::now();
     }
+    // ROS_INFO("End 4. **");
+    // ROS_INFO("unreal_ts: %lu",unreal_ts);
+    // ROS_INFO("first_imu_unreal_ts: %lu",first_imu_unreal_ts);
+    // ROS_INFO("minus: %lu",unreal_ts- first_imu_unreal_ts);
+    if (unreal_ts<first_imu_unreal_ts){
+        unreal_ts = first_imu_unreal_ts;
+    }
     return  first_imu_ros_ts + ros::Duration( (unreal_ts- first_imu_unreal_ts)/1e9);
 }
 // todo covariances
 sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib::ImuBase::Output& imu_data)
 {
+    //ROS_INFO("Begin 5.");
+    //ROS_INFO("IMU_DATA Time: %lu",imu_data.time_stamp);
     sensor_msgs::Imu imu_msg;
     // imu_msg.header.frame_id = "/airsim/odom_local_ned";// todo multiple cars
     imu_msg.orientation.x = imu_data.orientation.x();
@@ -708,21 +720,20 @@ sensor_msgs::Imu AirsimCarROSWrapper::get_imu_msg_from_airsim(const msr::airlib:
     // imu_msg.angular_velocity.x = imu_data.angular_velocity.x();
     // imu_msg.angular_velocity.y = imu_data.angular_velocity.y();
     // imu_msg.angular_velocity.z = imu_data.angular_velocity.z();
-    imu_msg.angular_velocity.x = (imu_data.angular_velocity.x());
-    imu_msg.angular_velocity.y = -(imu_data.angular_velocity.y());
-    imu_msg.angular_velocity.z = -(imu_data.angular_velocity.z());
+    imu_msg.angular_velocity.x = (imu_data.angular_velocity.y());
+    imu_msg.angular_velocity.y = -(imu_data.angular_velocity.z());
+    imu_msg.angular_velocity.z = -(imu_data.angular_velocity.x());
 
     // meters/s2^m 
     //imu_msg.linear_acceleration.x = imu_data.linear_acceleration.x();
-    imu_msg.linear_acceleration.x = -imu_data.linear_acceleration.x();
-    imu_msg.linear_acceleration.y = imu_data.linear_acceleration.y();
+    imu_msg.linear_acceleration.x = imu_data.linear_acceleration.y();
+    imu_msg.linear_acceleration.y = -imu_data.linear_acceleration.z();
     //imu_msg.linear_acceleration.z = imu_data.linear_acceleration.z();
-    imu_msg.linear_acceleration.z = -imu_data.linear_acceleration.z();
+    imu_msg.linear_acceleration.z = -imu_data.linear_acceleration.x();
     imu_msg.header.stamp = make_ts(imu_data.time_stamp);
     // imu_msg.orientation_covariance = ;
     // imu_msg.angular_velocity_covariance = ;
     // imu_msg.linear_acceleration_covariance = ;
-
     return imu_msg;
 }
 
@@ -783,9 +794,9 @@ void AirsimCarROSWrapper::car_imu_timer_cb(const ros::TimerEvent& event)
             int ctr = 0;
             for (const auto& vehicle_imu_pair: vehicle_imu_map_)
             {
-                //std::unique_lock<std::recursive_mutex> lck(drone_control_mutex_);
+                std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
                 auto imu_data = airsim_client_.getImuData(vehicle_imu_pair.second, vehicle_imu_pair.first);
-                //lck.unlock();
+                lck.unlock();
                 sensor_msgs::Imu imu_msg = get_imu_msg_from_airsim(imu_data);
                 imu_msg.header.frame_id = vehicle_imu_pair.first;
                 imu_pub_vec_[ctr].publish(imu_msg);
@@ -793,7 +804,7 @@ void AirsimCarROSWrapper::car_imu_timer_cb(const ros::TimerEvent& event)
             } 
         }
     }
-
+    
     catch (rpc::rpc_error& e)
     {
         std::cout << "error" << std::endl;
@@ -805,7 +816,7 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
 {
     try
     {
-        //std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+        std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
 
         // todo this is global origin
         origin_geo_point_pub_.publish(origin_geo_point_msg_);
@@ -813,9 +824,9 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
         for (auto& car_ros: car_ros_vec_)
         {
             // get car state from airsim
-            //std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+            std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
             car_ros.curr_car_state = airsim_client_.getCarState(car_ros.vehicle_name);
-            //lck.unlock();
+            lck.unlock();
             ros::Time curr_ros_time = ros::Time::now();
 
             // convert airsim car state to ROS msgs
@@ -845,14 +856,16 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
             if (car_ros.has_vel_cmd)
             {
                 /*
-                std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+                std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
                 airsim_client_.moveByVelocityAsync(car_ros.vel_cmd.x, car_ros.vel_cmd.y, car_ros.vel_cmd.z, vel_cmd_duration_, 
                     msr::airlib::DrivetrainType::MaxDegreeOfFreedom, car_ros.vel_cmd.yaw_mode, car_ros.vehicle_name);
                 lck.unlock();
                 */
                 //car_ros.controls.throttle = 0.5f;
                 //car_ros.controls.steering = 0.0f;
+                std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
                 airsim_client_.setCarControls(car_ros.controls);
+                lck.unlock();
                 //printf("############### CHECK POINT: car_ros.has_vel_cmd ###################");
             }
             // "clear" control cmds
@@ -867,7 +880,7 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
         /* 
         if (multirotor_ros.has_atti_cmd)
             {
-                //std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+                //std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
                 //auto imu_data = airsim_client_.getImuData(vehicle_imu_pair.second, vehicle_imu_pair.first);
                 airsim_client_.moveByAngleThrottleAsync(multirotor_ros.atti_cmd.pitch, 
                     multirotor_ros.atti_cmd.roll, multirotor_ros.atti_cmd.thrust, multirotor_ros.atti_cmd.yaw, vel_cmd_duration_, multirotor_ros.vehicle_name);
@@ -898,14 +911,14 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
         // todo add and expose a gimbal angular velocity to airlib
         if (has_gimbal_cmd_)
         {
-            //std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+            std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
             airsim_client_.simSetCameraOrientation(gimbal_cmd_.camera_name, gimbal_cmd_.target_quat, gimbal_cmd_.vehicle_name);
-            //lck.unlock();
+            lck.unlock();
         }
 
         has_gimbal_cmd_ = false;
     }
-
+    
     catch (rpc::rpc_error& e)
     {
         std::cout << "error" << std::endl;
@@ -956,7 +969,6 @@ void AirsimCarROSWrapper::set_nans_to_zeros_in_pose(const VehicleSetting& vehicl
 
     if (std::isnan(camera_setting.rotation.roll))
         camera_setting.rotation.roll = vehicle_setting.rotation.roll;
-
 }
 
 void AirsimCarROSWrapper::set_nans_to_zeros_in_pose(const VehicleSetting& vehicle_setting, LidarSetting& lidar_setting) const
@@ -1062,7 +1074,7 @@ void AirsimCarROSWrapper::img_response_timer_cb(const ros::TimerEvent& event)
         int image_response_idx = 0;
         for (const auto& airsim_img_request_vehicle_name_pair : airsim_img_request_vehicle_name_pair_vec_)
         {
-            //std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+            //std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
             const std::vector<ImageResponse>& img_response = airsim_client_images_.simGetImages(airsim_img_request_vehicle_name_pair.first, airsim_img_request_vehicle_name_pair.second);
             //lck.unlock();
             ROS_INFO_THROTTLE(1.0, "Grab image cost %fms Length %ld name %s", DT_MS(start), img_response.size(), airsim_img_request_vehicle_name_pair.second.c_str());
@@ -1087,16 +1099,16 @@ void AirsimCarROSWrapper::lidar_timer_cb(const ros::TimerEvent& event)
 {    
     try
     {
-        // std::lock_guard<std::recursive_mutex> guard(car_control_mutex);
+        // std::lock_guard<std::recursive_mutex> guard(car_control_mutex_);
         if (lidar_pub_vec_.size() > 0)
         {
             // std::lock_guard<std::recursive_mutex> guard(lidar_mutex_);
             int ctr = 0;
             for (const auto& vehicle_lidar_pair: vehicle_lidar_map_)
             {
-                //std::unique_lock<std::recursive_mutex> lck(car_control_mutex);
+                std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
                 auto lidar_data = airsim_client_lidar_.getLidarData(vehicle_lidar_pair.second, vehicle_lidar_pair.first); // airsim api is imu_name, vehicle_name
-                //lck.unlock();
+                lck.unlock();
                 sensor_msgs::PointCloud2 lidar_msg = get_lidar_msg_from_airsim(lidar_data); // todo make const ptr msg to avoid copy
                 lidar_msg.header.frame_id = vehicle_lidar_pair.second; // sensor frame name. todo add to doc
                 lidar_msg.header.stamp = ros::Time::now();
@@ -1180,13 +1192,11 @@ void AirsimCarROSWrapper::process_and_publish_img_response(const std::vector<Ima
     // todo add option to use airsim time (image_response.TTimePoint) like Gazebo /use_sim_time param
     ros::Time curr_ros_time = ros::Time::now(); 
     int img_response_idx_internal = img_response_idx;
-
     for (const auto& curr_img_response : img_response_vec)
     {
         // if a render request failed for whatever reason, this img will be empty.
         // Attempting to use a make_ts(0) results in ros::Duration runtime error.
         //if (curr_img_response.time_stamp == 0) continue;
-
         // todo publishing a tf for each capture type seems stupid. but it foolproofs us against render thread's async stuff, I hope. 
         // Ideally, we should loop over cameras and then captures, and publish only one tf.  
         publish_camera_tf(curr_img_response, curr_ros_time, vehicle_name, curr_img_response.camera_name);
