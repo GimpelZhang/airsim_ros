@@ -7,8 +7,8 @@
   </description>
   <license>BSD</license>
   <author>Junchuan Zhang</author>
-  <author email="zhangjunchuan@sineva.com">Junchuan Zhang</author>
-  <maintainer email="zhangjunchuan@sineva.com">Junchuan Zhang</maintainer>
+  <author email="zjunchuann@gmail.com">Junchuan Zhang</author>
+  <maintainer email="zjunchuan@gmail.com">Junchuan Zhang</maintainer>
   <url type="repository"></url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>airsim_ros_pkgs</build_depend>

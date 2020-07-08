@@ -2,7 +2,7 @@
 #include "std_msgs/String.h"
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <sensor_msgs/Imu.h>
+#include <nav_msgs/Odometry.h>
 #include <sstream>
 #include <iostream>
 #include <vector>
@@ -65,24 +65,28 @@ void DoShutdown(int sig)
     exit(sig);
 }
 
-void recorderCallback(const sensor_msgs::Imu& msg)
+void recorderCallback(const nav_msgs::Odometry& msg)
 {
     result_one.pose.header.frame_id = "vins_world";
+    result_one.pose.header.stamp = msg.header.stamp;
+    result_one.pose.pose = msg.pose.pose;
     result_output.push_back(result_one);
 
 }
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "car_pose_recorder");
-    if(argc !=2 ){
-            cerr << endl << "Usage: output_filename" << endl;
+    if(argc !=3 ){
+            cerr << endl << "Usage: output_filename rostopic_name" << endl;
     }
+    const char *rostopic_name;
     output_filename = argv[1];
+    rostopic_name = argv[2];
     
     ROS_INFO("Pose recorder starts.");
     
     ros::NodeHandle n1; 
-    ros::Subscriber sub = n1.subscribe("/imu",1,&recorderCallback);
+    ros::Subscriber sub = n1.subscribe(rostopic_name,1,&recorderCallback);
 
     ros::Rate rate(500.0);
 
@@ -91,8 +95,6 @@ int main(int argc, char** argv){
     ros::spinOnce();
     ros::Duration(0.1).sleep(); 
     while (ros::ok()){
-        
-        //加与不加以下这句ros::spinOnce();有很大区别，加的话只记录路径规划节点有主动控制时的pose，不加的话会记录全程的pose
         ros::spinOnce();
         rate.sleep();
     }
