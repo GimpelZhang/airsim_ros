@@ -912,7 +912,7 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
         if (has_gimbal_cmd_)
         {
             std::unique_lock<std::recursive_mutex> lck(car_control_mutex_);
-            airsim_client_.simSetCameraOrientation(gimbal_cmd_.camera_name, gimbal_cmd_.target_quat, gimbal_cmd_.vehicle_name);
+            airsim_client_.simSetCameraPose(gimbal_cmd_.camera_name, get_airlib_pose(0, 0, 0, gimbal_cmd_.target_quat), gimbal_cmd_.vehicle_name);
             lck.unlock();
         }
 
@@ -926,7 +926,10 @@ void AirsimCarROSWrapper::car_state_timer_cb(const ros::TimerEvent& event)
         std::cout << "Exception raised by the API:" << std::endl << msg << std::endl;
     }
 }
-
+msr::airlib::Pose AirsimCarROSWrapper::get_airlib_pose(const float& x, const float& y, const float& z, const msr::airlib::Quaternionr& airlib_quat) const
+{
+    return msr::airlib::Pose(msr::airlib::Vector3r(x, y, z), airlib_quat);
+}
 // airsim uses nans for zeros in settings.json. we set them to zeros here for handling tfs in ROS 
 void AirsimCarROSWrapper::set_nans_to_zeros_in_pose(VehicleSetting& vehicle_setting) const
 {
