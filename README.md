@@ -27,7 +27,7 @@ roslaunch airsim_ros_pkgs airsim_car_node.launch
 * If you do not have a joy control hardware, here is a keyboard control node for the Car simulated with the ROS node above. Usage:
 
 ```bash
-roslaunch airsim_car_teleop airsim_car_teleop_key.launch
+roslaunch airsim_car_teleop airsim_car_teleop_joy.launch
 ```
 
 * Simulation tools are provided to convert the car trajectory ground truth rostopic to a txt file (TUM), for evaluation postprocessing purpose. 
