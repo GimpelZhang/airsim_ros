@@ -1,0 +1,7 @@
+<launch>
+  <!-- airsim_car_teleop_key already has its own built in velocity smoother -->
+  <arg name="car_control_topic" default="/airsim_node/drone_1/car_cmd" />
+  <node pkg="airsim_car_teleop" type="airsim_car_teleop_joy" name="airsim_car_teleop_keyboard"  output="screen">
+    <remap from="car_cmd" to="$(arg car_control_topic)"/>
+  </node>
+</launch>

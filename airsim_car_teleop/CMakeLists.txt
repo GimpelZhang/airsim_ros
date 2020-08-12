@@ -41,6 +41,7 @@ catkin_package(
 ################################################################################
 catkin_install_python(PROGRAMS
   nodes/airsim_car_teleop_key
+  nodes/airsim_car_teleop_joy
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
