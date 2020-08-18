@@ -9,7 +9,7 @@ Package overview
 * `airsim_ros_pkgs`: Modified ros wrapper for airsim
 * `airsim_car_teleop`: A keyboard teleop ros node to control the simulating Car in airsim
 * `settings`: Vslam simulation tests setting files
-* `simu_tools`: Simulation related tools for handling the trajectory ground truth
+* `simu_tools`: Simulation related tools for handling the trajectory ground truth & dataset postprocessing
 
 Features
 --------
@@ -30,7 +30,7 @@ roslaunch airsim_ros_pkgs airsim_car_node.launch
 roslaunch airsim_car_teleop airsim_car_teleop_joy.launch
 ```
 
-* Simulation tools are provided to convert the car trajectory ground truth rostopic to a txt file (TUM), for evaluation postprocessing purpose. 
+* Simulation tools are provided to convert the car trajectory ground truth rostopic to a txt file (TUM), for evaluation postprocessing purpose. If there are any unexpected empty images in the dataset (with the phenomenon: an opencv Exception "Image is wrongly formed: height * step != size  or  0 * 0 != 1" raised), there is a python script to remove them.
 
 ```bash
 ### Either use the pose recorder node to record the ground truth during simulation: 
@@ -38,4 +38,8 @@ roslaunch simu_tools car_pose_recorder output_filename rostopic_name
 
 ### Or use the python script /simu_tools/scripts/groundtruth_extractor.py to extract the ground truth from a rosbag. 
 ./groundtruth_extractor.py
+
+### To move the empty images:
+./images_remove.py
+
 ```

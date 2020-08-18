@@ -2,7 +2,11 @@
 
 ## Quick Start
 
-Pose recorder:
+* dataset postprocessing:
+
+To remove empty images from the dataset: modify the py script to use.
+
+* Pose recorder:
 
 roslaunch simu_tools car_pose_recorder output_filename rostopic_name
 
