@@ -5,13 +5,13 @@
   "ViewMode": "SpringArmChase",
   "PhysicsEngineName": "FastPhysicsEngine",
   "ClockType": "SteppableClock",
-  "ClockSpeed": 1,
+  "ClockSpeed": 0.34,
   "Vehicles": {
     "drone_1": {
       "VehicleType": "PhysXCar",
       "DefaultVehicleState": "Armed",
-      "EnableCollisionPassthrogh": false,
-      "EnableCollisions": true,
+      "EnableCollisionPassthrogh": true,
+      "EnableCollisions": false,
       "AllowAPIAlways": true,
       "RC": {
         "RemoteControlID": 0,
@@ -34,7 +34,7 @@
               "TargetGamma": 1.5
             }
           ],
-          "X": 1.6, "Y": -0.06, "Z": -1.6,
+          "X": 0, "Y": -0.06, "Z": -2.4,
           "Pitch": 0, "Roll": 0, "Yaw": 0
         },
         "rightcamera_1": {
@@ -47,11 +47,11 @@
               "TargetGamma": 1.5
             }
           ],
-          "X": 1.6, "Y": 0.06, "Z": -1.6,
+          "X": 0, "Y": 0.06, "Z": -2.4,
           "Pitch": 0, "Roll": 0, "Yaw": 0
         }
       },
-      "X": 2, "Y": 0, "Z": 0,
+      "X": 0, "Y": 0, "Z": 0,
       "Pitch": 0, "Roll": 0, "Yaw": 0
     }
   },
