@@ -941,7 +941,9 @@ sensor_msgs::Imu AirsimROSWrapper::get_imu_msg_from_airsim(const msr::airlib::Im
     imu_msg.orientation.y = imu_data.orientation.y();
     imu_msg.orientation.z = imu_data.orientation.z();
     imu_msg.orientation.w = imu_data.orientation.w();
-
+    /*The following imu configs are from the work of xuhao1@github:
+    (xuhao1/airsim_ros_pkgs)[/https://github.com/xuhao1/airsim_ros_pkgs/blob/master/src/airsim_ros_wrapper.cpp]
+    corresponding with the vins setting files in the same repo. */
     // todo radians per second
     imu_msg.angular_velocity.x = (imu_data.angular_velocity.x());
     imu_msg.angular_velocity.y = -(imu_data.angular_velocity.y());
@@ -951,7 +953,7 @@ sensor_msgs::Imu AirsimROSWrapper::get_imu_msg_from_airsim(const msr::airlib::Im
     imu_msg.linear_acceleration.x = -imu_data.linear_acceleration.x();
     imu_msg.linear_acceleration.y = imu_data.linear_acceleration.y();
     imu_msg.linear_acceleration.z = -imu_data.linear_acceleration.z();
-
+    
     // imu_msg.orientation_covariance = ;
     // imu_msg.angular_velocity_covariance = ;
     // imu_msg.linear_acceleration_covariance = ;
