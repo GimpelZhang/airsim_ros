@@ -46,22 +46,22 @@ roslaunch simu_tools car_pose_recorder output_filename rostopic_name
 
 ```
 
-* Along with the releases, an editable demo City simulation environment is provided to test the ROS wrapper (for linux only). The AirSim plugin in this environment is a modified version from this repo: (GimpelZhang/AirSim)[https://github.com/GimpelZhang/AirSim], which is trying to solve the simulation speed problem in the Car SimMode ClockSpeed setting. 
+* Along with the releases, an editable demo City simulation environment is provided to test the ROS wrapper (for linux only). The AirSim plugin in this environment is a modified version from this repo: [GimpelZhang/AirSim](https://github.com/GimpelZhang/AirSim), which is trying to solve the simulation speed problem in the Car SimMode ClockSpeed setting. 
 
 ![screen_shot](https://github.com/GimpelZhang/airsim_ros/raw/master/docs/images/ScreenShot00001.jpg)
 
-```bash
+```
 More applications in vslam:
 
 ```
 ![screen_shot](https://github.com/GimpelZhang/airsim_ros/raw/master/docs/images/ORBSLAM2.jpg)
 
-![screen_shot](https://github.com/GimpelZhang/airsim_ros/raw/master/docs/images/.png)
+![screen_shot](https://github.com/GimpelZhang/airsim_ros/raw/master/docs/images/vins.jpg)
 
-```bash
+```
 Known bugs:
 
-1. The weather option doesn't work. Described in the (issue)[https://github.com/microsoft/AirSim/issues/2957]
+1. The weather option doesn't work. Described in the [issue](https://github.com/microsoft/AirSim/issues/2957)
 
 2. Empty images occasionally occur in output image rostopics. Temporarily the solution is images_remove.py
 
